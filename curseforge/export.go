@@ -26,7 +26,7 @@ var exportCmd = &cobra.Command{
 			os.Exit(1)
 		}
 
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

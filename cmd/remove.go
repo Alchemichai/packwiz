@@ -15,7 +15,7 @@ var removeCmd = &cobra.Command{
 	Aliases: []string{"delete", "uninstall", "rm"},
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

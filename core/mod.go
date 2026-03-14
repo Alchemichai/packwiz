@@ -18,6 +18,7 @@ type Mod struct {
 	FileName string      `toml:"filename"`
 	Side     string      `toml:"side,omitempty"`
 	Pin      bool        `toml:"pin,omitempty"`
+	Tags     []string `toml:"tags, omit"`
 	Download ModDownload `toml:"download"`
 	// Update is a map of map of stuff, so you can store arbitrary values on string keys to define updating
 	Update     map[string]map[string]interface{} `toml:"update"`

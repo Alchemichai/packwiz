@@ -19,8 +19,6 @@ var UpdateCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO: --check flag?
 		// TODO: specify multiple files to update at once?
-
-		fmt.Println("Loading modpack...")
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

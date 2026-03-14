@@ -9,7 +9,7 @@ import (
 )
 
 func pinMod(args []string, pinned bool) {
-	fmt.Println("Loading modpack...")
+	
 	pack, err := core.LoadPack()
 	if err != nil {
 		fmt.Println(err)

@@ -17,7 +17,7 @@ var openCmd = &cobra.Command{
 	Aliases: []string{"doc"},
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

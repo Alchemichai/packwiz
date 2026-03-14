@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -13,9 +14,10 @@ import (
 
 // listCmd represents the list command
 var listCmd = &cobra.Command{
-	Use:   "list",
-	Short: "List all the mods in the modpack",
-	Args:  cobra.NoArgs,
+	Use:     "list",
+	Short:   "List all the mods in the modpack",
+	Aliases: []string{"ls"},
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 
 		// Load pack
@@ -57,6 +59,28 @@ var listCmd = &cobra.Command{
 			mods = mods[:i]
 		}
 
+		//Filter mods by tag
+		if viper.IsSet("list.tag") {
+			targetTag := viper.GetString("list.tag")
+
+			i := 0
+			for _, mod := range mods {
+				for _, tag := range mod.Tags {
+					if targetTag == tag {
+						mods[i] = mod
+						i++
+						break
+					}
+				}
+			}
+			if i == 0 {
+				fmt.Printf("Could not find a mod with tag %q", targetTag)
+				os.Exit(1)
+			} else {
+				mods = mods[:i]
+			}
+		}
+
 		sort.Slice(mods, func(i, j int) bool {
 			return strings.ToLower(mods[i].Name) < strings.ToLower(mods[j].Name)
 		})
@@ -65,6 +89,12 @@ var listCmd = &cobra.Command{
 		if viper.GetBool("list.version") {
 			for _, mod := range mods {
 				fmt.Printf("%s (%s)\n", mod.Name, mod.FileName)
+			}
+		} else if viper.GetBool("list.meta") {
+			//print toml metaFile names
+			for _, mod := range mods {
+				metaFile := strings.TrimSuffix(filepath.Base(mod.GetFilePath()), core.MetaExtension)
+				fmt.Printf("%s (%s)\n", mod.Name, metaFile)
 			}
 		} else {
 			for _, mod := range mods {
@@ -79,7 +109,11 @@ func init() {
 
 	listCmd.Flags().BoolP("version", "v", false, "Print name and version")
 	_ = viper.BindPFlag("list.version", listCmd.Flags().Lookup("version"))
+	listCmd.Flags().BoolP("meta", "m", false, "Print name and metadata file slug")
+	_ = viper.BindPFlag("list.meta", listCmd.Flags().Lookup("meta"))
 	listCmd.Flags().StringP("side", "s", "", "Filter mods by side (e.g., client or server)")
 	_ = viper.BindPFlag("list.side", listCmd.Flags().Lookup("side"))
+	listCmd.Flags().StringP("tag", "t", "", "Filter mods by tag")
+	_ = viper.BindPFlag("list.tag", listCmd.Flags().Lookup("tag"))
 
 }

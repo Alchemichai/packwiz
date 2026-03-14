@@ -23,7 +23,7 @@ var exportCmd = &cobra.Command{
 	Short: "Export the current modpack into a .mrpack for Modrinth",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

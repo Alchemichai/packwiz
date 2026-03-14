@@ -15,7 +15,7 @@ var refreshCmd = &cobra.Command{
 	Short: "Refresh the index file",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)

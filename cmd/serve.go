@@ -37,7 +37,7 @@ var serveCmd = &cobra.Command{
 		if viper.GetBool("serve.basic") {
 			http.Handle("/", http.FileServer(http.Dir(".")))
 		} else {
-			fmt.Println("Loading modpack...")
+			
 			pack, err := core.LoadPack()
 			if err != nil {
 				fmt.Println(err)

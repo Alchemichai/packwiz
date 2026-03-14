@@ -47,6 +47,9 @@ func mustParseConstraint(s string) *semver.Constraints {
 
 // LoadPack loads the modpack metadata to a Pack struct
 func LoadPack() (Pack, error) {
+	fmt.Print("Loading modpack...\r")
+	defer fmt.Print("\r\033[K") //Clear line when finished loading.
+
 	var modpack Pack
 	if _, err := toml.DecodeFile(viper.GetString("pack-file"), &modpack); err != nil {
 		return Pack{}, err

@@ -18,7 +18,7 @@ var detectCmd = &cobra.Command{
 	Short: "Detect .jar files in the mods folder (experimental)",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Loading modpack...")
+		
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)
