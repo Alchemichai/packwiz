@@ -13,13 +13,17 @@ import (
 
 // Mod stores metadata about a mod. This is written to a TOML file for each mod.
 type Mod struct {
-	metaFile string      // The file for the metadata file, used as an ID
-	Name     string      `toml:"name"`
-	FileName string      `toml:"filename"`
-	Side     string      `toml:"side,omitempty"`
-	Pin      bool        `toml:"pin,omitempty"`
-	Tags     []string `toml:"tags, omit"`
-	Download ModDownload `toml:"download"`
+	metaFile      string        // The file for the metadata file, used as an ID
+	Name          string        `toml:"name"`
+	Slug          string        `toml:"slug,omitempty"`
+	FileName      string        `toml:"filename"`
+	Side          string        `toml:"side,omitempty"`
+	Pin           bool          `toml:"pin,omitempty"`
+	AutoInstalled bool          `toml:"auto-installed, omitempty"`
+	Tags          []string      `toml:"tags,omitempty"`
+	Download      ModDownload   `toml:"download"`
+	Relations     *ModRelations `toml:"installed-relations,omitempty"`
+
 	// Update is a map of map of stuff, so you can store arbitrary values on string keys to define updating
 	Update     map[string]map[string]interface{} `toml:"update"`
 	updateData map[string]interface{}
@@ -39,6 +43,13 @@ type ModDownload struct {
 	Hash       string `toml:"hash"`
 	// Mode defaults to modeURL (i.e. use URL when omitted or empty)
 	Mode string `toml:"mode,omitempty"`
+}
+
+// ModRelations specifies what dependencies exist for this mod file as mod IDs. This allows commands to be aware of what mods may break in relation to changes in related mods.
+type ModRelations struct {
+	Dependencies         []string `toml:"dependencies,omitempty"`
+	OptionalDependencies []string `toml:"optional-dependencies, omitempty"`
+	Conflicts            []string `toml:"conflicts,omitempty"`
 }
 
 // ModOption specifies optional metadata for this mod file

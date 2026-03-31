@@ -2,12 +2,13 @@ package curseforge
 
 import (
 	"fmt"
-	"github.com/aviddiviner/go-murmur"
-	"github.com/packwiz/packwiz/core"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/aviddiviner/go-murmur"
+	"github.com/packwiz/packwiz/core"
+	"github.com/spf13/cobra"
 )
 
 // TODO: make all of this less bad and hardcoded
@@ -18,7 +19,7 @@ var detectCmd = &cobra.Command{
 	Short: "Detect .jar files in the mods folder (experimental)",
 	Args:  cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		
+
 		pack, err := core.LoadPack()
 		if err != nil {
 			fmt.Println(err)
@@ -97,7 +98,7 @@ var detectCmd = &cobra.Command{
 
 		fmt.Println("Creating metadata files...")
 		for _, v := range res.ExactMatches {
-			err = createModFile(modInfosMap[v.ID], v.File, &index, false)
+			err = createModFile(modInfosMap[v.ID], v.File, &index, false, nil)
 			if err != nil {
 				fmt.Println(err)
 				os.Exit(1)

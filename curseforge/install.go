@@ -55,6 +55,7 @@ var installCmd = &cobra.Command{
 		category := categoryFlag
 		var modID, fileID uint32
 		var slug string
+		var installedDependencies []string
 
 		// If mod/file IDs are provided in command line, use those
 		if fileIDFlag != 0 {
@@ -171,6 +172,7 @@ var installCmd = &cobra.Command{
 						for _, data := range depsInstallable {
 							if id == data.ID {
 								contains = true
+								installedDependencies = append(installedDependencies, data.Slug)
 								break
 							}
 						}
@@ -224,12 +226,13 @@ var installCmd = &cobra.Command{
 
 					if cmdshared.PromptYesNo("Would you like to add them? [Y/n]: ") {
 						for _, v := range depsInstallable {
-							err = createModFile(v.modInfo, v.fileInfo, &index, false)
+							err = createModFile(v.modInfo, v.fileInfo, &index, false, nil, true)
 							if err != nil {
 								fmt.Println(err)
 								os.Exit(1)
 							}
 							fmt.Printf("Dependency \"%s\" successfully added! (%s)\n", v.modInfo.Name, v.fileInfo.FileName)
+							installedDependencies = append(installedDependencies, v.modInfo.Slug)
 						}
 					}
 				} else {
@@ -238,7 +241,7 @@ var installCmd = &cobra.Command{
 			}
 		}
 
-		err = createModFile(modInfoData, fileInfoData, &index, false)
+		err = createModFile(modInfoData, fileInfoData, &index, false, installedDependencies, false)
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)

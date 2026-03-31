@@ -221,6 +221,8 @@ type depMetadataStore struct {
 }
 
 func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, versionFilename string, pack core.Pack, index *core.Index) error {
+	var installedDependencies []string
+
 	if len(version.Files) == 0 {
 		return errors.New("version doesn't have any files attached")
 	}
@@ -269,7 +271,6 @@ func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, 
 					}
 					depVersionIDPendingQueue = depVersionIDPendingQueue[:0]
 				}
-
 				// Remove installed project IDs from dep queue
 				i := 0
 				for _, id := range depProjectIDPendingQueue {
@@ -277,6 +278,7 @@ func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, 
 					for _, dep := range depMetadata {
 						if *dep.projectInfo.ID == id {
 							contains = true
+							installedDependencies = append(installedDependencies, *dep.projectInfo.Slug) //TODO: Fix. installedDeps does not take IDs, it takes slugs.
 							break
 						}
 					}
@@ -352,11 +354,12 @@ func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, 
 
 				if cmdshared.PromptYesNo("Would you like to add them? [Y/n]: ") {
 					for _, v := range depMetadata {
-						err := createFileMeta(v.projectInfo, v.versionInfo, v.fileInfo, pack, index)
+						err := createFileMeta(v.projectInfo, v.versionInfo, v.fileInfo, pack, index, nil, true)
 						if err != nil {
 							return err
 						}
 						fmt.Printf("Dependency \"%s\" successfully added! (%s)\n", *v.projectInfo.Title, *v.fileInfo.Filename)
+						installedDependencies = append(installedDependencies, *v.projectInfo.Slug)
 					}
 				}
 			} else {
@@ -375,7 +378,7 @@ func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, 
 	// TODO: handle optional/required resource pack files
 
 	// Create the metadata file
-	err := createFileMeta(project, version, file, pack, index)
+	err := createFileMeta(project, version, file, pack, index, installedDependencies, false)
 	if err != nil {
 		return err
 	}
@@ -397,7 +400,7 @@ func installVersion(project *modrinthApi.Project, version *modrinthApi.Version, 
 	return nil
 }
 
-func createFileMeta(project *modrinthApi.Project, version *modrinthApi.Version, file *modrinthApi.File, pack core.Pack, index *core.Index) error {
+func createFileMeta(project *modrinthApi.Project, version *modrinthApi.Version, file *modrinthApi.File, pack core.Pack, index *core.Index, dependencies []string, autoInstalled bool) error {
 	updateMap := make(map[string]map[string]interface{})
 
 	var err error
@@ -421,9 +424,11 @@ func createFileMeta(project *modrinthApi.Project, version *modrinthApi.Version, 
 	}
 
 	modMeta := core.Mod{
-		Name:     *project.Title,
-		FileName: *file.Filename,
-		Side:     side,
+		Name:          *project.Title,
+		Slug:          *project.Slug,
+		FileName:      *file.Filename,
+		Side:          side,
+		AutoInstalled: autoInstalled,
 		Download: core.ModDownload{
 			URL:        *file.URL,
 			HashFormat: algorithm,
@@ -444,7 +449,11 @@ func createFileMeta(project *modrinthApi.Project, version *modrinthApi.Version, 
 	} else {
 		path = modMeta.SetMetaPath(filepath.Join(viper.GetString("meta-folder-base"), folder, core.SlugifyName(*project.Title)+core.MetaExtension))
 	}
-
+	if len(dependencies) > 0 {
+		modMeta.Relations = &core.ModRelations{
+			Dependencies: dependencies,
+		}
+	}
 	// If the file already exists, this will overwrite it!!!
 	// TODO: Should this be improved?
 	// Current strategy is to go ahead and do stuff without asking, with the assumption that you are using

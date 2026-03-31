@@ -73,7 +73,7 @@ var tagListCmd = &cobra.Command{
 			tagList = slices.Compact(tagList)
 			fmt.Println(strings.Join(tagList, "\n"))
 		} else {
-			// Mod specified list tags on that mod
+			// Mod specified, list tags on that mod
 			modPath, ok := index.FindMod(args[0])
 			if !ok {
 				fmt.Printf("Can't find mod %q\n", args[0])
@@ -94,6 +94,8 @@ var tagListCmd = &cobra.Command{
 	},
 }
 
+// TODO: Refactor into get/add/set/remove.
+// Should this be using this using modName, slugs, or IDs?
 func modifyTags(modName string, tags []string, adding bool) {
 	pack, err := core.LoadPack()
 	if err != nil {
@@ -162,6 +164,30 @@ func modifyTags(modName string, tags []string, adding bool) {
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func removeTags(modName string, tags []string) {
+	for _, tag := range tags {
+		if slices.Contains(tags, tag) {
+			tags = slices.DeleteFunc(tags, func(t string) bool {
+				return t == tag
+			})
+			fmt.Printf("Removed tag %q from %q", tag, modName)
+		} else {
+			fmt.Printf("Mod %q does not contain tag %q, skipping...", modName, tag)
+		}
+	}
+}
+
+func addTags(modName string, tags []string) {
+	for _, tag := range tags {
+		if !slices.Contains(tags, tag) {
+			tags = append(tags, tag)
+			fmt.Printf("Added tag %q to %q", tag, modName)
+		} else {
+			fmt.Printf("Mod %q already contains tag %q, skipping...", modName, tag)
+		}
 	}
 }
 

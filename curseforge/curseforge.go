@@ -176,7 +176,7 @@ func getPathForFile(gameID uint32, classID uint32, categoryID uint32, slug strin
 	return filepath.Join(viper.GetString("meta-folder-base"), metaFolder, slug+core.MetaExtension)
 }
 
-func createModFile(modInfo modInfo, fileInfo modFileInfo, index *core.Index, optionalDisabled bool) error {
+func createModFile(modInfo modInfo, fileInfo modFileInfo, index *core.Index, optionalDisabled bool, dependencies []string, autoInstalled bool) error {
 	updateMap := make(map[string]map[string]interface{})
 	var err error
 
@@ -199,9 +199,11 @@ func createModFile(modInfo modInfo, fileInfo modFileInfo, index *core.Index, opt
 	}
 
 	modMeta := core.Mod{
-		Name:     modInfo.Name,
-		FileName: fileInfo.FileName,
-		Side:     core.UniversalSide,
+		Name:          modInfo.Name,
+		Slug:          modInfo.Slug,
+		FileName:      fileInfo.FileName,
+		Side:          core.UniversalSide,
+		AutoInstalled: autoInstalled,
 		Download: core.ModDownload{
 			HashFormat: hashFormat,
 			Hash:       hash,
@@ -209,6 +211,11 @@ func createModFile(modInfo modInfo, fileInfo modFileInfo, index *core.Index, opt
 		},
 		Option: optional,
 		Update: updateMap,
+	}
+	if len(dependencies) > 0 {
+		modMeta.Relations = &core.ModRelations{
+			Dependencies: dependencies,
+		}
 	}
 	path := modMeta.SetMetaPath(getPathForFile(modInfo.GameID, modInfo.ClassID, modInfo.PrimaryCategoryID, modInfo.Slug))
 
